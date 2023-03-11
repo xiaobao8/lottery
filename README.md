@@ -15,5 +15,5 @@
 
 ## /api/raffle/ 可以对抽奖表增删改查。
 
-## 启动代码
+## 启动测试代码
   #### gunicorn -w 5 --threads 3 -b 0.0.0.0:8000 --timeout 60 lottery.wsgi:application
