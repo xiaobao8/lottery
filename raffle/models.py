@@ -2,6 +2,7 @@ from django.db import models
 from utils.model import BaseModel
 from utils.redis import RedisUtils
 from raffle import utils
+import traceback
 
 
 # Create your models here.
@@ -31,5 +32,10 @@ class WinningPrizeModel(BaseModel):
         db_table = "raffle_winningPrize"
         verbose_name = "中奖奖品表"
 
-utils.save_cache()
+
+try:
+    utils.save_cache()
+except Exception as e:
+    err = traceback.format_exc() + "\n" + "请配置好mysql和redis启动，如果是迁移数据库，注释这个代码在迁移"
+    exit(err)
 
