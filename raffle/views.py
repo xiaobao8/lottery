@@ -17,7 +17,7 @@ from django.db import transaction
 
 class RaffleAPIView(APIView):
 
-    def get(self, *args, **kwargs):
+    def post(self, *args, **kwargs):
         """
             抽奖api
             匿名用户：一个ip代表一个用户
