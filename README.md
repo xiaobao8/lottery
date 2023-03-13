@@ -1,7 +1,7 @@
 # lottery
 # 抽奖API
 
-## 根据config/config.ini 修改mysql和redis的配置，还有策略的配置，并添加相应的奖品等级数据。
+## 根据config/config.ini 修改mysql和redis的配置，还有策略的配置，并添加相应的奖品等级数据到raffle_prize表中。
 ## 现在写了两种策略：
   #### 策略1：
     plan=1
