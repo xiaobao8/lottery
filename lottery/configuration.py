@@ -29,6 +29,7 @@ REDIS_URL = try_get("redis", "url")
 REDIS_PORT = try_get("redis", "port")
 REDIS_PASSWORD = try_get("redis", "password")
 REDIS_MAX_CONNECTIONS = try_get("redis", "max_connections")
+REDIS_CELERY = try_get("redis", "celery")
 
 PLAN = try_get("tactics", "plan")
 

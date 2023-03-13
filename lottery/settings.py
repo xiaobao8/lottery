@@ -23,7 +23,7 @@ from lottery import configuration
 SECRET_KEY = 'django-insecure-!y92k2+kc69&jru&^%idnn#8tsv-6zek7&+&99mp19v0)*bu)f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(configuration.DEBUG)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    "raffle"
+    "raffle",
+    "django_celery_beat"
 ]
 
 MIDDLEWARE = [
@@ -214,6 +215,11 @@ LOGGING = {
     },
     # 配置用哪几种 handlers 来处理日志
     'loggers': {
+        "django": {
+            "handlers": ["console", "info"],
+            "level": "INFO",
+            "propagate": False
+        },
         'log': {
             'handlers': ['info', "error"],
             'level': 'INFO',
@@ -221,3 +227,47 @@ LOGGING = {
         }
     }
 }
+
+# CELERY配置
+# 消息队列存放地址
+BROKER_URL = configuration.REDIS_CELERY
+
+BROKER_RESULT_URL = configuration.REDIS_CELERY
+
+CELERY_RESULT_BACKEND = configuration.REDIS_CELERY
+# 任务序列化和反序列化    pickle
+CELERY_TASK_SERIALIZER = 'json'
+
+# 结果序列化格式，默认为pickle
+CELERY_RESULT_SERIALIZER = 'json'
+
+# 指定接受的内容类型(默认为允许所有格式)   ['pickle', 'json', 'msgpack', 'yaml']
+CELERY_ACCEPT_CONTENT = ['application/json', ]
+
+# 启动时区设置
+CELERY_ENABLE_UTC = False
+# 设置时区
+CELERY_TIMEZONE = TIME_ZONE
+
+
+# 任务过期时间，600s后结果结束
+# CELERY_TASK_TIME_LIMIT= 10 * 60
+DJANGO_CELERY_BEAT_TZ_AWARE = False
+# 并发的worker数量，也是命令行-c指定的数目，worker数量不是越多越好，保证任务不堆积，加上一些新增任务的预留就可以了
+CELERYD_CONCURRENCY = 16
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# celery worker 每次去BROKER中预取任务的数量
+CELERYD_PREFETCH_MULTIPLIER = 32
+
+# 每个worker最多执行1000个任务就会被销毁，可防止内存泄露
+CELERYD_MAX_TASKS_PER_CHILD = 1000
+
+# 任务过期时间，celery任务执行结果的超时时间
+CELERY_TASK_RESULT_EXPIRES = 24 * 60 * 60
+
+# Worker在任务执行完后才向Broker发送acks，告诉队列这个任务已经处理了，可靠性较强，但也可能出现重复执行
+CELERY_ACKS_LATE = True
+# 设置默认的队列名称，未指定的情况下都会放入默认队列中
+CELERY_DEFAULT_QUEUE = "default"
+#
