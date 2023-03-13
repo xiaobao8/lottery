@@ -5,10 +5,11 @@ from lottery import configuration
 
 # 方案一缓存
 def plan_1_cache():
-    p = models.PrizeModel.objects.values("level", "num", "id")
+    p = models.PrizeModel.objects.values("level", "surplus_num", "id")
     for i in p:
-        RedisUtils.set(i["level"], i["num"])
+        RedisUtils.set(i["level"], i["surplus_num"])
         RedisUtils.set("level_id_%s" % i["level"], i["id"])
+    RedisUtils.delete("no_flag")
 
 # 方案二缓存
 def plan_2_cache():

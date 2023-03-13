@@ -5,6 +5,7 @@ from raffle import models, utils
 from utils.redis import RedisUtils
 from raffle.serializer import PrizeSerializer, WinningPrizeSerializer
 from rest_framework import status
+from celery_tasks.raffles import tasks
 from utils import logger
 from utils import common
 from lottery import configuration
@@ -26,7 +27,6 @@ class RaffleAPIView(APIView):
             :return:
         """
         ip = common.get_client_ip(self.request)  # 用户标识
-
         if configuration.PLAN == "1":
             # # 方案一  会有一定概率未抽中的情况  但效率高  利用django的查询修改原子操作保证不超发的情况。
             if RedisUtils.get("no_flag"):
@@ -47,15 +47,13 @@ class RaffleAPIView(APIView):
             level = random.choices(["1", "2", "3"], weights=level_arr)[0]
             ''
             # 数量-1
-            res = models.PrizeModel.objects.filter(level=level, surplus_num__gte=1).update(
-                surplus_num=F("surplus_num") - 1)
-            if res:
-                key = "level_id_%s" % level
-                level_id = RedisUtils.get(key)
+            if models.PrizeModel.objects.filter(level=level, surplus_num__gte=1).update(surplus_num=F("surplus_num") - 1):
                 # 递减
                 RedisUtils.decr(level)
-                # 存储记录
-                models.WinningPrizeModel.objects.create(prize_id=level_id, ip=ip)
+                tasks.raffle_after.delay(level, ip)
+                # key = "level_id_%s" % level
+                # level_id = RedisUtils.get(key)
+                # models.WinningPrizeModel.objects.create(prize_id=level_id, ip=ip)
             else:
                 logger.info("未中奖")
                 return common.fail_response_data(description="未中奖")
