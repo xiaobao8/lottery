@@ -24,7 +24,7 @@ class RaffleAPIView(APIView):
             匿名用户：一个ip代表一个用户
             :param args:
             :param kwargs:
-            :return:
+            :return: #####
         """
         ip = common.get_client_ip(self.request)  # 用户标识
         if configuration.PLAN == "1":
